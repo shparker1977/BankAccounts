@@ -1,0 +1,6 @@
+Add John 4375751593 1000
+Charge John 100
+Add Maddy 2927642419 1000
+Credit Maddy 300
+Credit John 50
+Charge Maddy 50
