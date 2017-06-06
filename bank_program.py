@@ -1,47 +1,82 @@
 import sys
-from account import Account
+from account import AccountError, AccountValueError
+from bank import Bank, BankError
 
 
-class Bank(object):
-
-    def __init__(self):
-        bank_accounts = []
-        bank_directives = ['Add', 'Charge', 'Credit']
-
-    def validate_input(self, command):
-
-
-
-bank_accounts = []
-
-
-def read_input(source):
-    if source == 'stdin':
-        while True:
-            command = sys.stdin.readline()
-            process_command(command)
-            if not command:
-                break
-            sys.stdout.write(command)
-
-def process_command(command):
+# split command to directive and parameters
+def process_command(command, my_bank):
     split_command = command.split(' ')
     directive = split_command[0]
+    account_name = split_command[1]
+    if len(split_command) > 2:
+        try:
+            command_params = [int(x.rstrip()) for x in split_command[2:]]
+        except ValueError:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+
     if directive == 'Add':
-        add_account(split_command)
+        try:
+            my_bank.add_bank_account(account_name, *command_params)
+        except KeyError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+        except BankError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+        except AccountError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
     elif directive == 'Charge':
-        charge_account(split_command)
+        try:
+            my_bank.bank_accounts[account_name].charge_account(*command_params)
+        except AccountValueError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+        except KeyError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
     elif directive == 'Credit':
-        credit_account(split_command)
+        try:
+            my_bank.bank_accounts[account_name].credit_account(*command_params)
+        except AccountValueError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+        except KeyError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+    elif directive == 'Reset':
+        try:
+            my_bank.bank_accounts[account_name].reset_account()
+        except KeyError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+    elif directive == 'UpdateLimit':
+        try:
+            my_bank.bank_accounts[account_name].change_account_limit(*command_params)
+        except AccountValueError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
+        except KeyError as e:
+            sys.stdout.write('Invalid input.')
+            sys.exit(1)
 
 
-def add_account(add_command):
-    pass
+def main():
+
+    my_bank = Bank()
+
+    while True:
+        try:
+            command = sys.stdin.readline().rstrip()
+            if command is None or command == '\n' or command == '':
+                break
+            process_command(command, my_bank)
+        except EOFError:
+            exit(0)
 
 
-def charge_account(charge_command):
-    pass
+    my_bank.list_all_accounts()
 
-
-def credit_account(credit_command):
-    pass
+if __name__ == '__main__':
+    main()
